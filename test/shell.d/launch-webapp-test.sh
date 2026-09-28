@@ -10,6 +10,9 @@ trap 'rm -rf "$test_tmp"' EXIT
 mock_bin="$test_tmp/bin"
 test_home="$test_tmp/home"
 mkdir -p "$mock_bin" "$test_home/.local/share/applications"
+# Keep the launcher away from the running browser's singleton socket, which it
+# would otherwise hand these test URLs to.
+export XDG_CONFIG_HOME="$test_home/.config" XDG_DATA_HOME="$test_home/.local/share"
 
 cat >"$test_home/.local/share/applications/opera.desktop" <<'EOF'
 [Desktop Entry]
@@ -39,7 +42,7 @@ SH
 chmod +x "$mock_bin"/*
 
 launch_webapp() {
-  HOME="$test_home" PATH="$mock_bin:$PATH" \
+  HOME="$test_home" PATH="$mock_bin:$ROOT/bin:$PATH" \
     OMARCHY_TEST_BROWSER="$1" OMARCHY_TEST_LAUNCH="$test_tmp/launch" \
     bash "$ROOT/bin/omarchy-launch-webapp" "$2"
 }
